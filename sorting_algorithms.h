@@ -1,5 +1,3 @@
-#include <stdlib.h>
-
 // Swap two elements
 void swap(int *a, int *b) {
     int temp;
