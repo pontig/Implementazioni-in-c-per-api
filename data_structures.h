@@ -276,7 +276,7 @@ tree_node *tree_delete(tree_node *root, tree_node *elm) {
 typedef enum {
     RED,
     BLACK
-} color;
+} rb_color;
 
 // Typedef red-black tree node
 typedef struct rb_node {
@@ -285,7 +285,7 @@ typedef struct rb_node {
     struct rb_node *parent;
     int key;
     info *info;
-    color color;
+    rb_color color;
 } rb_node;
 
 // Rotations
@@ -328,41 +328,41 @@ void *right_rotate(rb_node *root, rb_node *y) {
 }
 
 // Red-Black tree fixup
-void *rb_fixup(rb_node *root, rb_node *elm) {
+void *rb_insert_fixup(rb_node *root, rb_node *elm) {
     if (elm->parent == NULL) {
         elm->color = BLACK;
     } else {
         rb_node *father = elm->parent;
         if (father->color == RED) {
-            if (father == elm->parent->left) {
-                rb_node *uncle = elm->parent->right;
-                if (uncle->color == RED) {
+            if (father == father->parent->left) {
+                rb_node *brother = elm->parent->right;
+                if (brother->color == RED) {
                     father->color = BLACK;
-                    uncle->color = BLACK;
+                    brother->color = BLACK;
                     father->parent->color = RED;
-                    rb_fixup(root, elm->parent);
+                    rb_insert_fixup(root, elm->parent);
                 } else {
                     if (elm == father->right) {
-                        elm = parent
-                        left_rotate(root, elm->parent);
-                        parent = elm->parent;
+                        elm = father;
+                        left_rotate(root, elm);
+                        father = elm->parent;
                     }
                     father->color = BLACK;
                     father->parent->color = RED;
                     right_rotate(root, father->parent);
                 }
             } else {
-                rb_node *uncle = elm->parent->left;
-                if (uncle->color == RED) {
+                rb_node *brother = elm->parent->left;
+                if (brother->color == RED) {
                     father->color = BLACK;
-                    uncle->color = BLACK;
+                    brother->color = BLACK;
                     father->parent->color = RED;
-                    rb_fixup(root, elm->parent);
+                    rb_insert_fixup(root, elm->parent);
                 } else {
                     if (elm == father->left) {
-                        elm = parent
-                        right_rotate(root, elm->parent);
-                        parent = elm->parent;
+                        elm = father;
+                        right_rotate(root, elm);
+                        father = elm->parent;
                     }
                     father->color = BLACK;
                     father->parent->color = RED;
@@ -371,4 +371,110 @@ void *rb_fixup(rb_node *root, rb_node *elm) {
             }
         }
     }
+}
+
+// Red-Black tree insert
+void *rb_insert(rb_node *root, int key, info *info) {
+    rb_node *parent = NULL;
+    rb_node *current = root;
+    while (current != NULL) {
+        parent = current;
+        if (key < current->key) {
+            current = current->left;
+        } else {
+            current = current->right;
+        }
+    }
+    rb_node *new_node = (rb_node *)malloc(sizeof(rb_node));
+    new_node->key = key;
+    new_node->info = info;
+    new_node->left = NULL;
+    new_node->right = NULL;
+    new_node->parent = parent;
+    new_node->color = RED;
+    if (parent == NULL) {
+        root = new_node;
+    } else if (key < parent->key) {
+        parent->left = new_node;
+    } else {
+        parent->right = new_node;
+    }
+    rb_insert_fixup(root, new_node);
+    return;
+}
+
+// Red-Black tree delete fixup
+void *rb_delete_fixup(rb_node *root, rb_node *elm) {
+    if (elm->color == RED || elm->parent == NULL) {
+        elm->color = BLACK;
+    } else if (elm == elm->parent->left) {
+        rb_node *brother = elm->parent->right;
+        if (brother->color == RED) {
+            brother->color = BLACK;
+            elm->parent->color = RED;
+            left_rotate(root, elm->parent);
+            brother = elm->parent->right;
+        }
+        if (brother->left->color == BLACK && brother->right->color == BLACK) {
+            brother->color = RED;
+            rb_delete_fixup(root, elm->parent);
+        } else {
+            if (brother->right->color == BLACK) {
+                brother->left->color = BLACK;
+                brother->color = RED;
+                right_rotate(root, brother);
+                brother = elm->parent->right;
+            }
+            brother->color = elm->parent->color;
+            elm->parent->color = BLACK;
+            brother->right->color = BLACK;
+            left_rotate(root, elm->parent);
+        }
+    } else {
+        rb_node *brother = elm->parent->left;
+        if (brother->color == RED) {
+            brother->color = BLACK;
+            elm->parent->color = RED;
+            right_rotate(root, elm->parent);
+            brother = elm->parent->left;
+        }
+        if (brother->right->color == BLACK && brother->left->color == BLACK) {
+            brother->color = RED;
+            rb_delete_fixup(root, elm->parent);
+        } else {
+            if (brother->left->color == BLACK) {
+                brother->right->color = BLACK;
+                brother->color = RED;
+                left_rotate(root, brother);
+                brother = elm->parent->left;
+            }
+            brother->color = elm->parent->color;
+            elm->parent->color = BLACK;
+            brother->left->color = BLACK;
+            right_rotate(root, elm->parent);
+        }
+    }
+}
+
+// Red-Black tree delete
+void *rb_delete(rb_node *root, rb_node *elm) {
+    rb_node *succ = (elm->left == NULL || elm->right == NULL) ? elm : rb_successor(elm);
+    rb_node *child = (succ->left == NULL) ? succ->right : succ->left;
+
+    child->parent = succ->parent;
+    if (succ->parent == NULL) {
+        root = child;
+    } else if (succ == succ->parent->left) {
+        succ->parent->left = child;
+    } else {
+        succ->parent->right = child;
+    }
+    if (succ != elm) {
+        elm->key = succ->key;
+        elm->info = succ->info;
+    }
+    if (succ->color == BLACK) {
+        rb_delete_fixup(root, child);
+    }
+    return succ;
 }
