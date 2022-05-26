@@ -109,6 +109,21 @@ dll_node *dll_insert(dll_node *head, int key, info *info) {
     return head;
 }
 
+// List insert at the beginning
+dll_node *dll_head_insert(dll_node *head, int key, info *info) {
+    dll_node *new_node = (dll_node *)malloc(sizeof(dll_node));
+    new_node->key = key;
+    new_node->info = info;
+    new_node->prev = NULL;
+    new_node->next = NULL;
+    if (head == NULL) {
+        return new_node;
+    }
+    new_node->next = head;
+    head->prev = new_node;
+    return new_node;
+}
+
 // List delete
 dll_node *dll_delete(dll_node *head, int key) {
     dll_node *current = head;
@@ -126,4 +141,49 @@ dll_node *dll_delete(dll_node *head, int key) {
         current = current->next;
     }
     return head;
+}
+
+//==================================================================
+// Hash Table
+//==================================================================
+
+#define A 0.61803398874989484820458683436564  // golden ratio complement
+#define M 701
+#define TABLE_SIZE 50
+
+// Typedef hash table
+typedef dll_node *hash_table[TABLE_SIZE];
+
+// Hash function division method
+int d_h(int key) {
+    return (key % M) % TABLE_SIZE;
+}
+
+// Hash function multiplication method
+int m_h(int key) {
+    return (M * key * A - floor(M * A * key)) % TABLE_SIZE;
+}
+
+// Hash insert, division and multiplication method
+hash_table d_hash_insert(hash_table table, int key, info *info) {
+    int index = d_h(key);
+    table[index] = dll_insert(table[index], key, info);
+    return table;
+}
+
+hash_table m_hash_insert(hash_table table, int key, info *info) {
+    int index = m_h(key);
+    table[index] = dll_insert(table[index], key, info);
+    return table;
+}
+
+// Hash search, division and multiplication method
+dll_node *d_hash_search(hash_table table, int key) {
+    int index = d_h(key);
+    return dll_search(table[index], key);
+}
+
+dll_node *m_hash_search(hash_table table, int key) {
+    int index = m_h(key);
+    return dll_search(table[index], key);
 }

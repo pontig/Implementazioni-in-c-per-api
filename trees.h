@@ -1,4 +1,5 @@
 #include <stdio.h>
+
 #include <stdlib>
 
 typedef struct Info {
@@ -118,30 +119,27 @@ void *tree_insert(tree_node *root, int key, info *info) {
 
 // Tree delete
 tree_node *tree_delete(tree_node *root, tree_node *elm) {
-    if (elm->left == NULL || elm->right == NULL) {
+    if (elm->left == NULL || elm->right == NULL)
         tree_node y = *elm;
-    } else
+    else
         tree_node y = *tree_successor(elm);
-    if (y->left != NULL) {
+    if (y->left != NULL)
         tree_node *x = y->left;
-    } else {
+    else
         tree_node *x = y->right;
-    }
-    if (x != NULL) {
+    if (x != NULL)
         x->parent = y->parent;
-    }
-    if (y->parent == NULL) {
+    if (y->parent == NULL)
         root = x;
-    } else if (y == y->parent->left) {
+    else if (y == y->parent->left)
         y->parent->left = x;
-    } else {
+    else
         y->parent->right = x;
-    }
+
     if (y != elm) {
         elm->key = y->key;
         elm->info = y->info;
     }
-    free(elm);
     return y;
 }
 
