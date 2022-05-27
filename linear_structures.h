@@ -3,6 +3,7 @@
 #define MAX_SIZE 101
 
 typedef struct Info {
+    char name[10];
     // TODO: Add your own data members
 } info;
 
@@ -143,11 +144,11 @@ dll_node *dll_delete(dll_node *head, int key) {
     return head;
 }
 
+#ifdef HASH
 //==================================================================
 // Hash Table
 //==================================================================
-
-#define A 0.61803398874989484820458683436564  // golden ratio complement
+#define CONST_A 0.61803398874989484820458683436564  // golden ratio complement
 #define M 701
 #define TABLE_SIZE 50
 
@@ -161,20 +162,21 @@ int d_h(int key) {
 
 // Hash function multiplication method
 int m_h(int key) {
-    return (M * key * A - floor(M * A * key)) % TABLE_SIZE;
+    return (int)((float)(M * key * CONST_A) - (int)(M * CONST_A * key)) % TABLE_SIZE;
 }
 
 // Hash insert, division and multiplication method
-hash_table d_hash_insert(hash_table table, int key, info *info) {
+void d_hash_insert(hash_table *table, int key, info *info) {
     int index = d_h(key);
-    table[index] = dll_insert(table[index], key, info);
-    return table;
+    // memcpy(dll_insert(*table[index], key, info), *table[index], 1);
+    *table[index] = dll_insert(*table[index], key, info);
+    return;
 }
 
-hash_table m_hash_insert(hash_table table, int key, info *info) {
+void m_hash_insert(hash_table *table, int key, info *info) {
     int index = m_h(key);
-    table[index] = dll_insert(table[index], key, info);
-    return table;
+    // table[index] = dll_insert(table[index], key, info);
+    return;
 }
 
 // Hash search, division and multiplication method
@@ -187,3 +189,4 @@ dll_node *m_hash_search(hash_table table, int key) {
     int index = m_h(key);
     return dll_search(table[index], key);
 }
+#endif
