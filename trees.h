@@ -7,16 +7,23 @@ typedef struct t_Info {
 } tree_info;
 
 //==================================================================
-// Tree
+// Tree, oka red-black trees
 //==================================================================
 
-// Typedef for the tree
+// Typedef enum red, black
+typedef enum {
+    RED,
+    BLACK
+} rb_color;
+
+// Typedef red-black tree node
 typedef struct tree_node {
-    int key;
-    tree_info *info;
     struct tree_node *left;
     struct tree_node *right;
     struct tree_node *parent;
+    int key;
+    tree_info info;
+    rb_color color;
 } tree_node;
 
 // Inorder tree walk
@@ -96,112 +103,13 @@ tree_node *tree_predecessor(tree_node *root) {
     return current;
 }
 
-// Tree insert
-tree_node *tree_insert(tree_node *root, int key, tree_info *info) {
-    if (root == NULL) {
-        tree_node *new_node = (tree_node *)malloc(sizeof(tree_node));
-        new_node->key = key;
-        new_node->info = info;
-        new_node->left = NULL;
-        new_node->right = NULL;
-        new_node->parent = NULL;
-        return new_node;
-    }
-    if (key < root->key) {
-        root->left = tree_insert(root->left, key, info);
-        root->left->parent = root;
-    } else {
-        root->right = tree_insert(root->right, key, info);
-        root->right->parent = root;
-    }
-    return root;
-}
-
-// Tree delete
-tree_node *tree_delete(tree_node *root, tree_node *elm) {
-    tree_node *y, *x;
-    if (elm->left == NULL || elm->right == NULL) {
-        y = elm;
-    } else {
-        y = tree_successor(elm);
-    }
-    if (y->left != NULL) {
-        x = y->left;
-    } else {
-        x = y->right;
-    }
-    if (x != NULL) {
-        x->parent = y->parent;
-    }
-    if (y->parent == NULL) {
-        root = x;
-    } else if (y == y->parent->left) {
-        y->parent->left = x;
-    } else {
-        y->parent->right = x;
-    }
-
-    if (y != elm) {
-        elm->key = y->key;
-        elm->info = y->info;
-    }
-    return y;
-}
-
 //==================================================================
 // Red-Black Tree
 //==================================================================
 
-// Typedef enum red, black
-typedef enum {
-    RED,
-    BLACK
-} rb_color;
-
-// Typedef red-black tree node
-typedef struct rb_node {
-    struct rb_node *left;
-    struct rb_node *right;
-    struct rb_node *parent;
-    int key;
-    info *info;
-    rb_color color;
-} rb_node;
-
-// RB Tree successor and predecessor
-rb_node *rb_tree_successor(rb_node *root) {
-    if (root == NULL) {
-        return NULL;
-    }
-    if (root->right != NULL) {
-        return tree_minimum(root->right);
-    }
-    rb_node *current = root->parent;
-    while (current != NULL && root == current->right) {
-        root = current;
-        current = current->parent;
-    }
-    return current;
-}
-
-rb_node *rb_tree_predecessor(rb_node *root) {
-    if (root == NULL) {
-        return NULL;
-    }
-    if (root->left != NULL) {
-        return tree_maximum(root->left);
-    }
-    rb_node *current = root->parent;
-    while (current != NULL && root == current->left) {
-        root = current;
-        current = current->parent;
-    }
-    return current;
-}
-
 // Rotations
-void left_rotate(rb_node *root, rb_node *x) {
-    rb_node *y = x->right;
+void left_rotate(tree_node *root, tree_node *x) {
+    tree_node *y = x->right;
     x->right = y->left;
     if (y->left != NULL) {
         y->left->parent = x;
@@ -219,8 +127,8 @@ void left_rotate(rb_node *root, rb_node *x) {
     return;
 }
 
-void right_rotate(rb_node *root, rb_node *y) {
-    rb_node *x = y->left;
+void right_rotate(tree_node *root, tree_node *y) {
+    tree_node *x = y->left;
     y->left = x->right;
     if (x->right != NULL) {
         x->right->parent = y;
@@ -239,14 +147,14 @@ void right_rotate(rb_node *root, rb_node *y) {
 }
 
 // Red-Black tree fixup
-void rb_insert_fixup(rb_node *root, rb_node *elm) {
+void rb_insert_fixup(tree_node *root, tree_node *elm) {
     if (elm->parent == NULL) {
         elm->color = BLACK;
     } else {
-        rb_node *father = elm->parent;
+        tree_node *father = elm->parent;
         if (father->color == RED) {
             if (father == father->parent->left) {
-                rb_node *brother = elm->parent->right;
+                tree_node *brother = elm->parent->right;
                 if (brother->color == RED) {
                     father->color = BLACK;
                     brother->color = BLACK;
@@ -263,7 +171,7 @@ void rb_insert_fixup(rb_node *root, rb_node *elm) {
                     right_rotate(root, father->parent);
                 }
             } else {
-                rb_node *brother = elm->parent->left;
+                tree_node *brother = elm->parent->left;
                 if (brother->color == RED) {
                     father->color = BLACK;
                     brother->color = BLACK;
@@ -285,9 +193,9 @@ void rb_insert_fixup(rb_node *root, rb_node *elm) {
 }
 
 // Red-Black tree insert
-void rb_insert(rb_node *root, int key, info *info) {
-    rb_node *parent = NULL;
-    rb_node *current = root;
+void rb_insert(tree_node *root, int key, tree_info *info) {
+    tree_node *parent = NULL;
+    tree_node *current = root;
     while (current != NULL) {
         parent = current;
         if (key < current->key) {
@@ -296,9 +204,9 @@ void rb_insert(rb_node *root, int key, info *info) {
             current = current->right;
         }
     }
-    rb_node *new_node = (rb_node *)malloc(sizeof(rb_node));
+    tree_node *new_node = (tree_node *)malloc(sizeof(tree_node));
     new_node->key = key;
-    new_node->info = info;
+    new_node->info = *info;
     new_node->left = NULL;
     new_node->right = NULL;
     new_node->parent = parent;
@@ -315,11 +223,11 @@ void rb_insert(rb_node *root, int key, info *info) {
 }
 
 // Red-Black tree delete fixup
-void rb_delete_fixup(rb_node *root, rb_node *elm) {
+void rb_delete_fixup(tree_node *root, tree_node *elm) {
     if (elm->color == RED || elm->parent == NULL) {
         elm->color = BLACK;
     } else if (elm == elm->parent->left) {
-        rb_node *brother = elm->parent->right;
+        tree_node *brother = elm->parent->right;
         if (brother->color == RED) {
             brother->color = BLACK;
             elm->parent->color = RED;
@@ -342,7 +250,7 @@ void rb_delete_fixup(rb_node *root, rb_node *elm) {
             left_rotate(root, elm->parent);
         }
     } else {
-        rb_node *brother = elm->parent->left;
+        tree_node *brother = elm->parent->left;
         if (brother->color == RED) {
             brother->color = BLACK;
             elm->parent->color = RED;
@@ -368,9 +276,9 @@ void rb_delete_fixup(rb_node *root, rb_node *elm) {
 }
 
 // Red-Black tree delete
-rb_node *rb_delete(rb_node *root, rb_node *elm) {
-    rb_node *succ = (elm->left == NULL || elm->right == NULL) ? elm : rb_tree_successor(elm);
-    rb_node *child = (succ->left == NULL) ? succ->right : succ->left;
+tree_node *rb_delete(tree_node *root, tree_node *elm) {
+    tree_node *succ = (elm->left == NULL || elm->right == NULL) ? elm : tree_successor(elm);
+    tree_node *child = (succ->left == NULL) ? succ->right : succ->left;
 
     child->parent = succ->parent;
     if (succ->parent == NULL) {
