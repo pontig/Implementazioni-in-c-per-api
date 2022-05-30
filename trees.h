@@ -117,36 +117,6 @@ tree_node *tree_insert(tree_node *root, int key, tree_info *info) {
     return root;
 }
 
-// Function to print binary tree in 2D
-// It does reverse inorder traversal
-void print2DUtil(tree_node *root, int space) {
-    // Base case
-    if (root == NULL)
-        return;
-
-    // Increase distance between levels
-    space += 10;
-
-    // Process right child first
-    print2DUtil(root->right, space);
-
-    // Print current node after space
-    // count
-    printf("\n");
-    for (int i = 10; i < space; i++)
-        printf(" ");
-    printf("%d\n", root->key);
-
-    // Process left child
-    print2DUtil(root->left, space);
-}
-
-// Wrapper over print2DUtil()
-void print2D(tree_node *root) {
-    // Pass initial space count as 0
-    print2DUtil(root, 0);
-}
-
 // Tree delete
 tree_node *tree_delete(tree_node *root, tree_node *elm) {
     tree_node *y, *x;
@@ -197,6 +167,37 @@ typedef struct rb_node {
     info *info;
     rb_color color;
 } rb_node;
+
+// RB Tree successor and predecessor
+rb_node *rb_tree_successor(rb_node *root) {
+    if (root == NULL) {
+        return NULL;
+    }
+    if (root->right != NULL) {
+        return tree_minimum(root->right);
+    }
+    rb_node *current = root->parent;
+    while (current != NULL && root == current->right) {
+        root = current;
+        current = current->parent;
+    }
+    return current;
+}
+
+rb_node *rb_tree_predecessor(rb_node *root) {
+    if (root == NULL) {
+        return NULL;
+    }
+    if (root->left != NULL) {
+        return tree_maximum(root->left);
+    }
+    rb_node *current = root->parent;
+    while (current != NULL && root == current->left) {
+        root = current;
+        current = current->parent;
+    }
+    return current;
+}
 
 // Rotations
 void left_rotate(rb_node *root, rb_node *x) {
@@ -368,7 +369,7 @@ void rb_delete_fixup(rb_node *root, rb_node *elm) {
 
 // Red-Black tree delete
 rb_node *rb_delete(rb_node *root, rb_node *elm) {
-    rb_node *succ = (elm->left == NULL || elm->right == NULL) ? elm : tree_successor(elm);
+    rb_node *succ = (elm->left == NULL || elm->right == NULL) ? elm : rb_tree_successor(elm);
     rb_node *child = (succ->left == NULL) ? succ->right : succ->left;
 
     child->parent = succ->parent;

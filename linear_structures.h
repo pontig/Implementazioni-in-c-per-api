@@ -79,16 +79,13 @@ typedef struct dll_node {
     info *info;
 } dll_node;
 
-// List search
-dll_node *dll_search(dll_node *head, int key) {
-    dll_node *current = head;
-    while (current != NULL) {
-        if (current->key == key) {
-            return current;
-        }
-        current = current->next;
+// Print the list
+void print_list(dll_node *head) {
+    dll_node *curr = head;
+    while (curr != NULL) {
+        printf("%d: %s\n", curr->key, curr->info->name);
+        curr = curr->next;
     }
-    return NULL;
 }
 
 // List insert
@@ -125,6 +122,18 @@ dll_node *dll_head_insert(dll_node *head, int key, info *info) {
     return new_node;
 }
 
+// List search
+dll_node *dll_search(dll_node *head, int key) {
+    dll_node *current = head;
+    while (current != NULL) {
+        if (current->key == key) {
+            return current;
+        }
+        current = current->next;
+    }
+    return NULL;
+}
+
 // List delete
 dll_node *dll_delete(dll_node *head, int key) {
     dll_node *current = head;
@@ -144,7 +153,7 @@ dll_node *dll_delete(dll_node *head, int key) {
     return head;
 }
 
-#ifdef HASH
+//#ifdef HASH
 //==================================================================
 // Hash Table
 //==================================================================
@@ -162,21 +171,25 @@ int d_h(int key) {
 
 // Hash function multiplication method
 int m_h(int key) {
-    return (int)((float)(M * key * CONST_A) - (int)(M * CONST_A * key)) % TABLE_SIZE;
+    float temp = (float)key;
+    temp *= CONST_A;
+    key = temp * M;
+    return key % TABLE_SIZE;
 }
 
 // Hash insert, division and multiplication method
-void d_hash_insert(hash_table *table, int key, info *info) {
+hash_table *d_hash_insert(hash_table *table, int key, info *info) {
     int index = d_h(key);
-    // memcpy(dll_insert(*table[index], key, info), *table[index], 1);
-    *table[index] = dll_insert(*table[index], key, info);
-    return;
+    printf("Index is %d\n", index);
+    (*table)[index] = dll_insert((*table)[index], key, info);
+    return table;
 }
 
-void m_hash_insert(hash_table *table, int key, info *info) {
+hash_table *m_hash_insert(hash_table *table, int key, info *info) {
     int index = m_h(key);
-    // table[index] = dll_insert(table[index], key, info);
-    return;
+    printf("Index is %d\n", index);
+    (*table)[index] = dll_insert((*table)[index], key, info);
+    return table;
 }
 
 // Hash search, division and multiplication method
@@ -189,4 +202,4 @@ dll_node *m_hash_search(hash_table table, int key) {
     int index = m_h(key);
     return dll_search(table[index], key);
 }
-#endif
+//#endif
