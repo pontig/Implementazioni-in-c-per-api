@@ -153,7 +153,6 @@ dll_node *dll_delete(dll_node *head, int key) {
     return head;
 }
 
-//#ifdef HASH
 //==================================================================
 // Hash Table
 //==================================================================
@@ -163,6 +162,15 @@ dll_node *dll_delete(dll_node *head, int key) {
 
 // Typedef hash table
 typedef dll_node *hash_table[TABLE_SIZE];
+
+// Initialize hash table
+hash_table *hash_init() {
+    hash_table *hash_head = (hash_table *)malloc(sizeof(dll_node) * TABLE_SIZE);
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        (*hash_head)[i] = NULL;
+    }
+    return hash_head;
+}
 
 // Hash function division method
 int d_h(int key) {
@@ -202,4 +210,3 @@ dll_node *m_hash_search(hash_table table, int key) {
     int index = m_h(key);
     return dll_search(table[index], key);
 }
-//#endif

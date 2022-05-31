@@ -103,10 +103,6 @@ tree_node *tree_predecessor(tree_node *root) {
     return current;
 }
 
-//==================================================================
-// Red-Black Tree
-//==================================================================
-
 // Rotations
 void left_rotate(tree_node *root, tree_node *x) {
     tree_node *y = x->right;
@@ -190,6 +186,7 @@ void rb_insert_fixup(tree_node *root, tree_node *elm) {
             }
         }
     }
+    return;
 }
 
 // Red-Black tree insert
