@@ -104,7 +104,7 @@ tree_node *tree_predecessor(tree_node *root) {
 }
 
 // Rotations
-void left_rotate(tree_node *root, tree_node *x) {
+tree_node left_rotate(tree_node *root, tree_node *x) {
     tree_node *y = x->right;
     x->right = y->left;
     if (y->left != NULL) {
@@ -120,10 +120,10 @@ void left_rotate(tree_node *root, tree_node *x) {
     }
     y->left = x;
     x->parent = y;
-    return;
+    return root;
 }
 
-void right_rotate(tree_node *root, tree_node *y) {
+tree_node right_rotate(tree_node *root, tree_node *y) {
     tree_node *x = y->left;
     y->left = x->right;
     if (x->right != NULL) {
@@ -139,11 +139,11 @@ void right_rotate(tree_node *root, tree_node *y) {
     }
     x->right = y;
     y->parent = x;
-    return;
+    return root;
 }
 
 // Red-Black tree fixup
-void rb_insert_fixup(tree_node *root, tree_node *elm) {
+tree_node rb_insert_fixup(tree_node *root, tree_node *elm) {
     if (elm->parent == NULL) {
         elm->color = BLACK;
     } else {
@@ -155,16 +155,16 @@ void rb_insert_fixup(tree_node *root, tree_node *elm) {
                     father->color = BLACK;
                     brother->color = BLACK;
                     father->parent->color = RED;
-                    rb_insert_fixup(root, elm->parent);
+                    root = rb_insert_fixup(root, elm->parent);
                 } else {
                     if (elm == father->right) {
                         elm = father;
-                        left_rotate(root, elm);
+                        root = left_rotate(root, elm);
                         father = elm->parent;
                     }
                     father->color = BLACK;
                     father->parent->color = RED;
-                    right_rotate(root, father->parent);
+                    root = right_rotate(root, father->parent);
                 }
             } else {
                 tree_node *brother = elm->parent->left;
@@ -172,25 +172,25 @@ void rb_insert_fixup(tree_node *root, tree_node *elm) {
                     father->color = BLACK;
                     brother->color = BLACK;
                     father->parent->color = RED;
-                    rb_insert_fixup(root, elm->parent);
+                    root = rb_insert_fixup(root, elm->parent);
                 } else {
                     if (elm == father->left) {
                         elm = father;
-                        right_rotate(root, elm);
+                        root = right_rotate(root, elm);
                         father = elm->parent;
                     }
                     father->color = BLACK;
                     father->parent->color = RED;
-                    left_rotate(root, father->parent);
+                    root = left_rotate(root, father->parent);
                 }
             }
         }
     }
-    return;
+    return root;
 }
 
 // Red-Black tree insert
-void rb_insert(tree_node *root, int key, tree_info *info) {
+tree_node rb_insert(tree_node *root, int key, tree_info *info) {
     tree_node *parent = NULL;
     tree_node *current = root;
     while (current != NULL) {
@@ -215,12 +215,12 @@ void rb_insert(tree_node *root, int key, tree_info *info) {
     } else {
         parent->right = new_node;
     }
-    rb_insert_fixup(root, new_node);
-    return;
+    root = rb_insert_fixup(root, new_node);
+    return root;
 }
 
 // Red-Black tree delete fixup
-void rb_delete_fixup(tree_node *root, tree_node *elm) {
+tree_node rb_delete_fixup(tree_node *root, tree_node *elm) {
     if (elm->color == RED || elm->parent == NULL) {
         elm->color = BLACK;
     } else if (elm == elm->parent->left) {
@@ -228,48 +228,49 @@ void rb_delete_fixup(tree_node *root, tree_node *elm) {
         if (brother->color == RED) {
             brother->color = BLACK;
             elm->parent->color = RED;
-            left_rotate(root, elm->parent);
+            root = left_rotate(root, elm->parent);
             brother = elm->parent->right;
         }
         if (brother->left->color == BLACK && brother->right->color == BLACK) {
             brother->color = RED;
-            rb_delete_fixup(root, elm->parent);
+            root = rb_delete_fixup(root, elm->parent);
         } else {
             if (brother->right->color == BLACK) {
                 brother->left->color = BLACK;
                 brother->color = RED;
-                right_rotate(root, brother);
+                root = right_rotate(root, brother);
                 brother = elm->parent->right;
             }
             brother->color = elm->parent->color;
             elm->parent->color = BLACK;
             brother->right->color = BLACK;
-            left_rotate(root, elm->parent);
+            root = left_rotate(root, elm->parent);
         }
     } else {
         tree_node *brother = elm->parent->left;
         if (brother->color == RED) {
             brother->color = BLACK;
             elm->parent->color = RED;
-            right_rotate(root, elm->parent);
+            root = right_rotate(root, elm->parent);
             brother = elm->parent->left;
         }
         if (brother->right->color == BLACK && brother->left->color == BLACK) {
             brother->color = RED;
-            rb_delete_fixup(root, elm->parent);
+            root = rb_delete_fixup(root, elm->parent);
         } else {
             if (brother->left->color == BLACK) {
                 brother->right->color = BLACK;
                 brother->color = RED;
-                left_rotate(root, brother);
+                root = left_rotate(root, brother);
                 brother = elm->parent->left;
             }
             brother->color = elm->parent->color;
             elm->parent->color = BLACK;
             brother->left->color = BLACK;
-            right_rotate(root, elm->parent);
+            root = right_rotate(root, elm->parent);
         }
     }
+    return root;
 }
 
 // Red-Black tree delete
@@ -290,7 +291,7 @@ tree_node *rb_delete(tree_node *root, tree_node *elm) {
         elm->info = succ->info;
     }
     if (succ->color == BLACK) {
-        rb_delete_fixup(root, child);
+        root = rb_delete_fixup(root, child);
     }
     return succ;
 }
