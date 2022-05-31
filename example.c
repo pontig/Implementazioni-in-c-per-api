@@ -12,7 +12,7 @@ int main(int argc, char const *argv[]) {
 
     tree_node *root = NULL;
     for (int i = 0; i < 10; i++) {
-        rb_insert(root, i, &ins);
+        root = rb_insert(root, i, &ins);
     }
     inorder_tree_walk(root);
 

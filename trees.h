@@ -104,7 +104,7 @@ tree_node *tree_predecessor(tree_node *root) {
 }
 
 // Rotations
-tree_node left_rotate(tree_node *root, tree_node *x) {
+tree_node *left_rotate(tree_node *root, tree_node *x) {
     tree_node *y = x->right;
     x->right = y->left;
     if (y->left != NULL) {
@@ -123,7 +123,7 @@ tree_node left_rotate(tree_node *root, tree_node *x) {
     return root;
 }
 
-tree_node right_rotate(tree_node *root, tree_node *y) {
+tree_node *right_rotate(tree_node *root, tree_node *y) {
     tree_node *x = y->left;
     y->left = x->right;
     if (x->right != NULL) {
@@ -143,7 +143,7 @@ tree_node right_rotate(tree_node *root, tree_node *y) {
 }
 
 // Red-Black tree fixup
-tree_node rb_insert_fixup(tree_node *root, tree_node *elm) {
+tree_node *rb_insert_fixup(tree_node *root, tree_node *elm) {
     if (elm->parent == NULL) {
         elm->color = BLACK;
     } else {
@@ -190,7 +190,7 @@ tree_node rb_insert_fixup(tree_node *root, tree_node *elm) {
 }
 
 // Red-Black tree insert
-tree_node rb_insert(tree_node *root, int key, tree_info *info) {
+tree_node *rb_insert(tree_node *root, int key, tree_info *info) {
     tree_node *parent = NULL;
     tree_node *current = root;
     while (current != NULL) {
@@ -220,7 +220,7 @@ tree_node rb_insert(tree_node *root, int key, tree_info *info) {
 }
 
 // Red-Black tree delete fixup
-tree_node rb_delete_fixup(tree_node *root, tree_node *elm) {
+tree_node *rb_delete_fixup(tree_node *root, tree_node *elm) {
     if (elm->color == RED || elm->parent == NULL) {
         elm->color = BLACK;
     } else if (elm == elm->parent->left) {
